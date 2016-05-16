@@ -1,6 +1,6 @@
 FROM alpine:latest
 ENV DISUNITY_VERSION=v0.3.4
-ENV UNITY3D2PNG_VERSION=v0.0.1
+ENV UNITY3D2PNG_VERSION=v0.0.2
 RUN apk add --update curl bash openjdk7-jre imagemagick
 WORKDIR /root
 RUN curl -L -O https://github.com/ata4/disunity/releases/download/${DISUNITY_VERSION}/disunity_${DISUNITY_VERSION}.zip && \
