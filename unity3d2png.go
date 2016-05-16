@@ -44,16 +44,25 @@ func (s Service) convert() string {
 	return s.Convert
 }
 
+func (s Service) exists(file string) bool {
+	_, err := os.Stat(file)
+	return err == nil
+}
+
 func (s Service) Extract(file string) ([]Extract, error) {
 	stdout, stderr, err := execCmd(s.java(), "-jar", s.disunity(), "extract", file)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed exec")
-	}
 	if 0 < len(stdout) {
 		logrus.Info(string(stdout))
 	}
 	if 0 < len(stderr) {
 		logrus.Warn(string(stderr))
+	}
+	if err != nil {
+		return nil, errors.Wrap(err, "failed disunity")
+	}
+
+	if !s.exists(strings.TrimSuffix(file, ".unity3d")) {
+		return []Extract{}, nil
 	}
 
 	var tgas []string
@@ -71,14 +80,14 @@ func (s Service) Extract(file string) ([]Extract, error) {
 	for _, tga := range tgas {
 		png := strings.TrimSuffix(tga, ".tga") + ".png"
 		stdout, stderr, err := execCmd(s.convert(), tga, png)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed exec")
-		}
 		if 0 < len(stdout) {
 			logrus.Info(string(stdout))
 		}
 		if 0 < len(stderr) {
 			logrus.Warn(string(stderr))
+		}
+		if err != nil {
+			return nil, errors.Wrap(err, "failed convert")
 		}
 		es = append(es, Extract{
 			Unity3d: file,
